@@ -44,3 +44,7 @@ $ docker images
 REPOSITORY                  TAG                 IMAGE ID            CREATED             SIZE
 tfcv                        latest              d31c6a846d9b        16 hours ago        5.59GB
 ```
+
+## History
+
+- update to use model 'ssd_mobilenet_v2_coco_2018_03_29'

@@ -2,7 +2,6 @@
 # https://github.com/tensorflow/models/blob/master/research/object_detection/object_detection_tutorial.ipynb
 # Tensorflow Object Detection Detector
 
-from flask import Flask, request, jsonify
 import numpy as np
 import tensorflow as tf
 import cv2
@@ -56,7 +55,7 @@ class DetectorAPI:
         return boxes_list, scores[0].tolist(), [int(x) for x in classes[0].tolist()], int(num[0])
     
     def detect_human(self, img):
-        boxes, scores, classes, num = odapi.processFrame(img)
+        boxes, scores, classes, num = self.processFrame(img)
         is_human_detected = False
 
         for i in range(len(boxes)):
@@ -77,41 +76,11 @@ class DetectorAPI:
 #===============================================================================
 # model_path = './faster_rcnn_inception_v2_coco_2018_01_28/frozen_inference_graph.pb'
 # this one works very fast
-model_path = './ssd_mobilenet_v1_coco_2017_11_17/frozen_inference_graph.pb'
-odapi = DetectorAPI(path_to_ckpt=model_path)
+model_path = './ssd_mobilenet_v2_coco_2018_03_29/frozen_inference_graph.pb'
 THRESHOLD = 0.65
-#===============================================================================
-# REST API SECTION
-#===============================================================================
-app = Flask(__name__)
-
-@app.route('/', methods=['POST'])
-def index():
-    """Detect if there any object in the picture"""
-    # convert string of image data to uint8
-    nparr = np.fromstring(request.data, np.uint8)
-    # decode image
-    img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    img = cv2.resize(img, (1024, 768))
-    
-    if odapi.detect_human(img):
-        timestr = time.strftime("%Y%m%d-%H%M%S")
-        cv2.imwrite('./pics/' + timestr + '.jpg',img)
-        resp = jsonify("human detected")
-    else:
-        # No human detected!
-        timestr = time.strftime("%Y%m%d-%H%M%S")
-        cv2.imwrite('./pics/' + timestr + '.jpg',img)
-        resp = jsonify("not found")
-        resp.status_code = 404
-    return resp
-
-def run(debug=False):
-    """Run this as an REST API"""
-    app.run(host="0.0.0.0", port=9000, debug=debug)
-
 
 if __name__ == "__main__":
+    odapi = DetectorAPI(path_to_ckpt=model_path)
     cap = cv2.VideoCapture(0)
 
     while True:
